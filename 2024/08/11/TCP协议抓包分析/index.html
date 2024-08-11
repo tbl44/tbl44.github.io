@@ -1,0 +1,428 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>TCP协议抓包分析 | Hi New World!</title><meta name="author" content="benben"><meta name="copyright" content="benben"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="tcp协议的分析TCP（传输控制协议）是一种面向连接的、可靠的、基于字节流的传输层通信协议。它主要用于在网络中实现可靠的数据传输。TCP协议的主要特点和功能包括：  连接导向：TCP在数据传输之前需要建立一个连接。这通过三次握手过程来完成，以确保两端的通信双方都准备好进行数据传输。 可靠性：TCP提供数据传输的可靠性。它使用确认（ACK）机制来确保数据包被成功接收。如果发送方在超时时间内没有收到确">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TCP协议抓包分析">
+<meta property="og:url" content="http://example.com/2024/08/11/TCP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="Hi New World!">
+<meta property="og:description" content="tcp协议的分析TCP（传输控制协议）是一种面向连接的、可靠的、基于字节流的传输层通信协议。它主要用于在网络中实现可靠的数据传输。TCP协议的主要特点和功能包括：  连接导向：TCP在数据传输之前需要建立一个连接。这通过三次握手过程来完成，以确保两端的通信双方都准备好进行数据传输。 可靠性：TCP提供数据传输的可靠性。它使用确认（ACK）机制来确保数据包被成功接收。如果发送方在超时时间内没有收到确">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img/profile.jpg">
+<meta property="article:published_time" content="2024-08-11T09:17:52.000Z">
+<meta property="article:modified_time" content="2024-08-11T09:28:25.976Z">
+<meta property="article:author" content="benben">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/profile.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2024/08/11/TCP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css?v=4.13.0"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":1,"unescape":false,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid@4.11.1/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'TCP协议抓包分析',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-08-11 17:28:25'
+}</script><link rel="stylesheet" href="APlayer.min.css"><div id="aplayer"></div><script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js" async></script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><!-- hexo injector head_end start --><link rel="stylesheet" href="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.css" /><!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.3.0"></head><body><script>window.paceOptions = {
+  restartOnPushState: false
+}
+
+document.addEventListener('pjax:send', () => {
+  Pace.restart()
+})
+</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/themes/blue/pace-theme-minimal.min.css"/><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/profile.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">5</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/background.jpg')"><nav id="nav"><span id="blog-info"><a href="/" title="Hi New World!"><span class="site-name">Hi New World!</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> List</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> Music</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> Movie</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> Link</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">TCP协议抓包分析</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-08-11T09:17:52.000Z" title="发表于 2024-08-11 17:17:52">2024-08-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-08-11T09:28:25.976Z" title="更新于 2024-08-11 17:28:25">2024-08-11</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">2.7k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>8分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="TCP协议抓包分析"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="tcp协议的分析"><a href="#tcp协议的分析" class="headerlink" title="tcp协议的分析"></a>tcp协议的分析</h1><p>TCP（传输控制协议）是一种<strong>面向连接的、可靠的、基于字节流</strong>的传输层通信协议。它主要用于在网络中实现可靠的数据传输。TCP协议的主要特点和功能包括：</p>
+<ol>
+<li><strong>连接导向</strong>：TCP在数据传输之前需要建立一个连接。这通过三次握手过程来完成，以确保两端的通信双方都准备好进行数据传输。</li>
+<li><strong>可靠性</strong>：TCP提供数据传输的可靠性。它使用确认（ACK）机制来确保数据包被成功接收。如果发送方在超时时间内没有收到确认，它会重新发送数据包。</li>
+<li><strong>数据流控制</strong>：TCP使用流量控制机制来避免接收方的缓冲区溢出。接收方会告知发送方它可以接收的数据量，从而避免数据发送过快。</li>
+<li><strong>拥塞控制</strong>：TCP能够检测网络拥塞，并通过减少数据发送速率来减轻网络拥塞。这有助于防止网络过载和数据包丢失。</li>
+<li><strong>数据顺序保证</strong>：TCP确保数据包按发送顺序到达接收方。如果数据包到达的顺序与发送顺序不一致，TCP会重新排序数据包。</li>
+<li><strong>错误检测和修正</strong>：TCP对传输中的数据进行错误检测，并要求重新传输丢失或损坏的数据包。</li>
+</ol>
+<p>这些功能使得TCP适用于需要高可靠性的应用，如网页浏览、电子邮件和文件传输等。</p>
+<h2 id="有哪些协议是基于TCP协议来设计的？"><a href="#有哪些协议是基于TCP协议来设计的？" class="headerlink" title="有哪些协议是基于TCP协议来设计的？"></a>有哪些协议是基于TCP协议来设计的？</h2><p>基于TCP协议制定的协议主要包括各种应用层协议，这些协议利用TCP提供的可靠、面向连接的数据传输特性来实现特定的网络功能。以下是一些基于TCP协议的常见协议：</p>
+<ol>
+<li><strong>HTTP（Hypertext Transfer Protocol）</strong>：<ul>
+<li>用于在Web浏览器和Web服务器之间传输网页和其他资源。</li>
+<li>支持请求和响应模型，如GET、POST、PUT、DELETE等方法。</li>
+</ul>
+</li>
+<li><strong>HTTPS（Hypertext Transfer Protocol Secure）</strong>：<ul>
+<li>HTTP的安全版本，通过SSL&#x2F;TLS加密传输数据，确保数据在传输过程中的机密性和完整性。</li>
+</ul>
+</li>
+<li><strong>FTP（File Transfer Protocol）</strong>：<ul>
+<li>用于在网络上进行文件传输和管理。</li>
+<li>支持多种操作，包括上传、下载、删除和重命名文件。</li>
+</ul>
+</li>
+<li><strong>SMTP（Simple Mail Transfer Protocol）</strong>：<ul>
+<li>用于发送电子邮件。</li>
+<li>定义了邮件的格式和传输规则，从客户端发送邮件到邮件服务器，然后再转发到目标邮件服务器。</li>
+</ul>
+</li>
+<li><strong>IMAP（Internet Message Access Protocol）</strong>：<ul>
+<li>用于从邮件服务器检索邮件。</li>
+<li>支持在邮件服务器上管理邮件的文件夹和邮件状态。</li>
+</ul>
+</li>
+<li><strong>POP3（Post Office Protocol version 3）</strong>：<ul>
+<li>用于从邮件服务器下载邮件。</li>
+<li>邮件下载到客户端后通常会从服务器上删除，适用于简单的邮件接收需求。</li>
+</ul>
+</li>
+<li><strong>Telnet</strong>：<ul>
+<li>用于远程登录到另一台计算机上进行命令行操作。</li>
+<li>允许用户在远程计算机上执行命令和管理系统。</li>
+</ul>
+</li>
+<li><strong>SSH（Secure Shell）</strong>：<ul>
+<li>用于安全的远程登录和执行命令。</li>
+<li>提供加密和认证功能，确保远程会话的安全性。</li>
+</ul>
+</li>
+<li><strong>SFTP（Secure File Transfer Protocol）</strong>：<ul>
+<li>基于SSH的文件传输协议。</li>
+<li>提供安全的文件传输和管理功能。</li>
+</ul>
+</li>
+<li><strong>RDP（Remote Desktop Protocol）</strong>：<ul>
+<li>用于通过网络远程访问Windows计算机的桌面环境。</li>
+<li>允许用户在远程计算机上进行图形用户界面的操作。</li>
+</ul>
+</li>
+</ol>
+<p>常用的电脑协议端口包括以下几种，涵盖了多种网络服务和应用：</p>
+<h3 id="常用端口"><a href="#常用端口" class="headerlink" title="常用端口"></a>常用端口</h3><ul>
+<li><strong>20&#x2F;21 - FTP（File Transfer Protocol）</strong><ul>
+<li><strong>20</strong>：FTP数据传输端口（被动模式时使用）。</li>
+<li><strong>21</strong>：FTP控制端口（用于建立和管理连接）。</li>
+</ul>
+</li>
+<li><strong>22 - SSH（Secure Shell）&#x2F;SFTP（Secure File Transfer Protocol）</strong><ul>
+<li><strong>22</strong>：用于安全的远程登录和文件传输。</li>
+</ul>
+</li>
+<li><strong>23 - Telnet</strong><ul>
+<li><strong>23</strong>：用于远程登录服务（不加密，通常不推荐用于安全敏感的环境）。</li>
+</ul>
+</li>
+<li><strong>25 - SMTP（Simple Mail Transfer Protocol）</strong><ul>
+<li><strong>25</strong>：用于发送电子邮件。</li>
+</ul>
+</li>
+<li><strong>53 - DNS（Domain Name System）</strong><ul>
+<li><strong>53</strong>：用于域名解析服务。</li>
+</ul>
+</li>
+<li><strong>67&#x2F;68 - DHCP（Dynamic Host Configuration Protocol）</strong><ul>
+<li><strong>67</strong>：DHCP服务器端口。</li>
+<li><strong>68</strong>：DHCP客户端端口。</li>
+</ul>
+</li>
+<li><strong>80 - HTTP（Hypertext Transfer Protocol）</strong><ul>
+<li><strong>80</strong>：用于Web服务（非加密）。</li>
+</ul>
+</li>
+<li><strong>110 - POP3（Post Office Protocol version 3）</strong><ul>
+<li><strong>110</strong>：用于接收电子邮件。</li>
+</ul>
+</li>
+<li><strong>143 - IMAP（Internet Message Access Protocol）</strong><ul>
+<li><strong>143</strong>：用于接收和管理电子邮件。</li>
+</ul>
+</li>
+<li><strong>443 - HTTPS（Hypertext Transfer Protocol Secure）</strong><ul>
+<li><strong>443</strong>：用于加密的Web服务。</li>
+</ul>
+</li>
+<li><strong>3389 - RDP（Remote Desktop Protocol）</strong><ul>
+<li><strong>3389</strong>：用于远程桌面连接（Windows系统）。</li>
+</ul>
+</li>
+</ul>
+<h3 id="三次握手（Three-Way-Handshake）"><a href="#三次握手（Three-Way-Handshake）" class="headerlink" title="三次握手（Three-Way Handshake）"></a>三次握手（Three-Way Handshake）</h3><p>TCP协议在建立连接时使用三次握手过程，确保双方都准备好进行数据传输。三次握手的步骤如下：</p>
+<ol>
+<li><strong>SYN</strong>：客户端向服务器发送一个SYN（同步）报文段，请求建立连接。此报文段包含客户端的初始序列号。</li>
+<li><strong>SYN-ACK</strong>：服务器收到客户端的SYN报文段后，回复一个SYN-ACK（同步-确认）报文段。此报文段包含服务器的初始序列号，并确认收到客户端的SYN报文段。</li>
+<li><strong>ACK</strong>：客户端收到服务器的SYN-ACK报文段后，发送一个ACK（确认）报文段，确认收到服务器的SYN报文段。此时，连接建立完成，双方可以开始数据传输。</li>
+</ol>
+<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/08/11/TCP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/1.png" class="" title="alt text">
+
+<h3 id="四次挥手（Four-Way-Handshake）"><a href="#四次挥手（Four-Way-Handshake）" class="headerlink" title="四次挥手（Four-Way Handshake）"></a>四次挥手（Four-Way Handshake）</h3><p>TCP连接的终止过程使用四次挥手，以确保双方都完成了数据传输并可以安全地关闭连接。四次挥手的步骤如下：</p>
+<ol>
+<li><strong>FIN</strong>：发送方（例如客户端）发送一个FIN（结束）报文段，表示它已经完成了数据传输，并且没有更多的数据要发送。此时，发送方进入<strong>FIN_WAIT_1</strong>状态。</li>
+<li><strong>ACK</strong>：接收方（例如服务器）收到FIN报文段后，发送一个ACK（确认）报文段，确认接收方已经收到FIN报文段。此时，接收方进入CLOSE_WAIT状态，发送方进入<strong>FIN_WAIT_2</strong>状态。</li>
+<li><strong>FIN</strong>：接收方完成它的所有数据传输后，发送一个FIN报文段，表示它也没有更多的数据要发送。此时，接收方进入<strong>LAST_ACK</strong>状态，发送方收到此FIN报文段后，进入TIME_WAIT状态。</li>
+<li><strong>ACK</strong>：发送方收到接收方的FIN报文段后，发送一个ACK报文段，确认接收到接收方的FIN报文段。此时，接收方进入<strong>CLOSED</strong>状态，发送方在超时后也进入CLOSED状态，连接完全关闭。</li>
+</ol>
+<p><strong>（典型的TCP四次挥手）</strong></p>
+<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/08/11/TCP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/2.png" class="" title="alt text">
+
+<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/08/11/TCP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/3.png" class="" title="alt text">
+
+
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">第一次挥手：想要关闭连接的一方（在这里是服务器）会发送一个FIN报文给另一方（物理机），表示它已经没有数据要发送了，并且想要关闭连接。这个FIN报文是从服务器的22端口发送到物理机的某个随机高位端口的。</span><br><span class="line"></span><br><span class="line">第二次挥手：物理机在收到服务器的FIN报文后，会发送一个ACK报文作为应答，表示它已经收到了服务器的FIN报文。这个ACK报文是从物理机的那个随机高位端口发送到服务器的22端口的。</span><br><span class="line"></span><br><span class="line">第三次挥手（如果有必要）：在某些情况下，物理机也可能想要关闭连接，这时它会发送一个FIN报文给服务器。但是，在正常的SSH会话退出过程中，这一步通常不会发生，因为物理机通常不会主动关闭连接，除非它遇到了某种错误或异常。然而，如果物理机确实发送了FIN报文，那么这个报文也是从物理机的随机高位端口发送到服务器的22端口的。</span><br><span class="line"></span><br><span class="line">第四次挥手：服务器在收到物理机的FIN报文（如果有的话）或确认物理机已经收到了自己的FIN报文后（通过物理机发送的ACK报文），会发送一个ACK报文给物理机，表示它也已经准备好了关闭连接。这个ACK报文是从服务器的22端口发送到物理机的随机高位端口的。</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>（非典型的TCP四次挥手）</strong></p>
+<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/08/11/TCP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/4.png" class="" title="alt text">
+
+<h2 id="为什么上图中抓到的报文不是典型的TCP四次挥手的报文呢？"><a href="#为什么上图中抓到的报文不是典型的TCP四次挥手的报文呢？" class="headerlink" title="为什么上图中抓到的报文不是典型的TCP四次挥手的报文呢？"></a>为什么上图中抓到的报文不是典型的TCP四次挥手的报文呢？</h2><figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">如果你抓到的TCP四次挥手报文是由客户端（物理机）先发起的第一次挥手（即客户端发送FIN报文），那么这通常意味着SSH连接的关闭过程并非由服务器端的exit命令直接触发，而是由客户端或客户端上的某个进程/应用程序发起的。</span><br><span class="line"></span><br><span class="line">以下是一些可能导致客户端先发起FIN报文的原因：</span><br><span class="line"></span><br><span class="line">客户端主动关闭SSH会话：</span><br><span class="line">用户可能在客户端上使用了某种方式（如SSH客户端软件的关闭按钮、键盘快捷键、或执行了exit、logout等命令）来主动关闭SSH会话。这将导致客户端向服务器发送FIN报文来请求关闭TCP连接。</span><br><span class="line"></span><br><span class="line">客户端程序逻辑：</span><br><span class="line">如果SSH会话是由某个自动化脚本或程序启动的，并且该脚本或程序在完成其任务后包含了关闭SSH连接的逻辑，那么它可能会主动发送FIN报文来关闭连接。</span><br><span class="line"></span><br><span class="line">网络问题或中断：</span><br><span class="line">在极少数情况下，网络问题（如突然的网络断开、路由器故障等）可能导致TCP连接异常关闭，尽管这通常不会表现为标准的四次挥手过程。然而，如果客户端的网络堆栈检测到连接已经不可达，它可能会尝试发送FIN报文来优雅地关闭连接（尽管这通常不是网络问题导致的标准行为）。</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="连接状态"><a href="#连接状态" class="headerlink" title="连接状态"></a>连接状态</h4><ul>
+<li><strong>SYN_SENT</strong>：连接请求已经发送，等待对方确认。</li>
+<li><strong>SYN_RECEIVED</strong>：已经收到连接请求，并发送了确认。</li>
+<li><strong>ESTABLISHED</strong>：连接已建立，可以进行数据传输。</li>
+<li><strong>FIN_WAIT_1</strong>：等待对方确认连接关闭请求。</li>
+<li><strong>FIN_WAIT_2</strong>：已经收到对方确认连接关闭请求，等待对方关闭连接。</li>
+<li><strong>CLOSE_WAIT</strong>：对方关闭连接，等待应用程序关闭连接。</li>
+<li><strong>LAST_ACK</strong>：等待对方确认最后一个关闭连接的请求。</li>
+<li><strong>TIME_WAIT</strong>：等待足够的时间以确保对方收到关闭连接的确认。</li>
+<li><strong>CLOSED</strong>：连接完全关闭。</li>
+</ul>
+<p>三次握手确保连接的双方能够可靠地建立通信，四次挥手确保连接能够被安全地关闭，避免数据丢失和资源浪费。</p>
+<h2 id="wireshark抓包分析："><a href="#wireshark抓包分析：" class="headerlink" title="wireshark抓包分析："></a>wireshark抓包分析：</h2><p>​	通过上面的阐述，我们可以了解到那些协议是基于TCP协议设计制定的。下面我们通过SSH连接来产生TCP报文，并通过wireshark来抓包分析其报文：</p>
+<h4 id="三次握手："><a href="#三次握手：" class="headerlink" title="三次握手："></a><strong>三次握手：</strong></h4><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/08/11/TCP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/5.png" class="" title="alt text">
+
+
+
+<img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/2024/08/11/TCP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/6.png" class="" title="alt text">
+
+
+
+<h4 id="四次挥手"><a href="#四次挥手" class="headerlink" title="四次挥手"></a><strong>四次挥手</strong></h4></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://example.com">benben</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2024/08/11/TCP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/">http://example.com/2024/08/11/TCP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">Hi New World!</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="/img/profile.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2024/08/08/ICMP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/" title="ICMP协议抓包分析"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">ICMP协议抓包分析</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/profile.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">benben</div><div class="author-info__description">勤学如春起之苗，不见其增日有所长；辍学如磨刀之石，不见其损日有所亏。</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">5</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/tbl44"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/tbl44" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#tcp%E5%8D%8F%E8%AE%AE%E7%9A%84%E5%88%86%E6%9E%90"><span class="toc-number">1.</span> <span class="toc-text">tcp协议的分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%89%E5%93%AA%E4%BA%9B%E5%8D%8F%E8%AE%AE%E6%98%AF%E5%9F%BA%E4%BA%8ETCP%E5%8D%8F%E8%AE%AE%E6%9D%A5%E8%AE%BE%E8%AE%A1%E7%9A%84%EF%BC%9F"><span class="toc-number">1.1.</span> <span class="toc-text">有哪些协议是基于TCP协议来设计的？</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E7%94%A8%E7%AB%AF%E5%8F%A3"><span class="toc-number">1.1.1.</span> <span class="toc-text">常用端口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%EF%BC%88Three-Way-Handshake%EF%BC%89"><span class="toc-number">1.1.2.</span> <span class="toc-text">三次握手（Three-Way Handshake）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B%EF%BC%88Four-Way-Handshake%EF%BC%89"><span class="toc-number">1.1.3.</span> <span class="toc-text">四次挥手（Four-Way Handshake）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8A%E5%9B%BE%E4%B8%AD%E6%8A%93%E5%88%B0%E7%9A%84%E6%8A%A5%E6%96%87%E4%B8%8D%E6%98%AF%E5%85%B8%E5%9E%8B%E7%9A%84TCP%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B%E7%9A%84%E6%8A%A5%E6%96%87%E5%91%A2%EF%BC%9F"><span class="toc-number">1.2.</span> <span class="toc-text">为什么上图中抓到的报文不是典型的TCP四次挥手的报文呢？</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BF%9E%E6%8E%A5%E7%8A%B6%E6%80%81"><span class="toc-number">1.2.0.1.</span> <span class="toc-text">连接状态</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#wireshark%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90%EF%BC%9A"><span class="toc-number">1.3.</span> <span class="toc-text">wireshark抓包分析：</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B%EF%BC%9A"><span class="toc-number">1.3.0.1.</span> <span class="toc-text">三次握手：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B"><span class="toc-number">1.3.0.2.</span> <span class="toc-text">四次挥手</span></a></li></ol></li></ol></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/11/TCP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/" title="TCP协议抓包分析">TCP协议抓包分析</a><time datetime="2024-08-11T09:17:52.000Z" title="发表于 2024-08-11 17:17:52">2024-08-11</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/08/ICMP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/" title="ICMP协议抓包分析">ICMP协议抓包分析</a><time datetime="2024-08-08T15:57:24.000Z" title="发表于 2024-08-08 23:57:24">2024-08-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/07/ARP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/" title="ARP协议抓包分析">ARP协议抓包分析</a><time datetime="2024-08-07T15:55:24.000Z" title="发表于 2024-08-07 23:55:24">2024-08-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/06/%E5%A6%82%E4%BD%95%E6%90%AD%E5%BB%BA%E8%87%AA%E5%B7%B1%E7%9A%84%E5%8D%9A%E5%AE%A2/" title="如何搭建自己的博客">如何搭建自己的博客</a><time datetime="2024-08-06T15:43:31.000Z" title="发表于 2024-08-06 23:43:31">2024-08-06</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/08/04/hello-world/" title="Hello World">Hello World</a><time datetime="2024-08-04T01:25:37.100Z" title="发表于 2024-08-04 09:25:37">2024-08-04</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2024 By benben</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js?v=4.13.0"></script><script src="/js/main.js?v=4.13.0"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.33/dist/fancybox/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.8.8/dist/lazyload.iife.min.js"></script><div class="js-pjax"></div><div class="aplayer no-destroy" data-id="12402120383" data-server="netease" data-type="playlist" data-fixed="true" data-autoplay="true" data-lrcType="-1"> </div><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/activate-power-mode.min.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+POWERMODE.mobile = true;
+document.body.addEventListener('input', POWERMODE);
+</script><script id="click-show-text" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/dist/click-show-text.min.js" data-mobile="true" data-text="富强,民主,文明,和谐,平等,公正,法治,爱国,敬业,诚信,友善" data-fontsize="20px" data-random="true" async="async"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer@1.10.1/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1.1.3/metingjs/dist/Meting.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener
+  btf.removeGlobalFnEvent('pjax')
+  btf.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js?v=4.13.0"></script></div></div><!-- hexo injector body_end start --><script data-pjax>
+  function butterfly_clock_anzhiyu_injector_config(){
+    var parent_div_git = document.getElementsByClassName('sticky_layout')[0];
+    var item_html = '<div class="card-widget card-clock"><div class="card-glass"><div class="card-background"><div class="card-content"><div id="hexo_electric_clock"><img class="entered loading" id="card-clock-loading" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/loading.gif" style="height: 120px; width: 100%;" data-ll-status="loading"/></div></div></div></div></div>';
+    console.log('已挂载butterfly_clock_anzhiyu')
+    if(parent_div_git) {
+      parent_div_git.insertAdjacentHTML("afterbegin",item_html)
+    }
+  }
+  var elist = 'null'.split(',');
+  var cpage = location.pathname;
+  var epage = 'all';
+  var qweather_key = 'e09f65780c2c43298e7815a626ef1edc';
+  var gaud_map_key = 'e2400d01ddac1934cd144466b5768574&s';
+  var baidu_ak_key = 'undefined';
+  var flag = 0;
+  var clock_rectangle = '112.982279,28.19409';
+  var clock_default_rectangle_enable = 'true';
+
+  for (var i=0;i<elist.length;i++){
+    if (cpage.includes(elist[i])){
+      flag++;
+    }
+  }
+
+  if ((epage ==='all')&&(flag == 0)){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  else if (epage === cpage){
+    butterfly_clock_anzhiyu_injector_config();
+  }
+  </script><script src="https://widget.qweather.net/simple/static/js/he-simple-common.js?v=2.0"></script><script data-pjax src="https://cdn.cbd.int/hexo-butterfly-clock-anzhiyu/lib/clock.min.js"></script><!-- hexo injector body_end end --></body></html>
