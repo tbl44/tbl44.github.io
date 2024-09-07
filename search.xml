@@ -4,6 +4,25 @@
   
     
     <entry>
+      <title>DHCP协议抓包分析</title>
+      <link href="/2024/09/07/DHCP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/"/>
+      <url>/2024/09/07/DHCP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/</url>
+      
+        <content type="html"><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><h1 id="DHCP完整过程详解及Wireshark抓包分析"><a href="#DHCP完整过程详解及Wireshark抓包分析" class="headerlink" title="DHCP完整过程详解及Wireshark抓包分析"></a>DHCP完整过程详解及Wireshark抓包分析</h1><h2 id="DHCP简介"><a href="#DHCP简介" class="headerlink" title="DHCP简介"></a>DHCP简介</h2><p>DHCP，Dynamic Host Configuration Protocol，<strong>动态</strong>主机配置协议，简单来说就是主机获取IP地址的过程，属于应用层协议。<br>DHCP采用UDP的67（服务器）和68（客户端）端口进行通信。</p><h2 id="报文协商过程"><a href="#报文协商过程" class="headerlink" title="报文协商过程"></a>报文协商过程</h2><p>DHCP过程主要为</p><p>​<strong>DHCP Discover</strong></p><p>​<strong>DHCP Offer</strong></p><p>​<strong>DHCP Request</strong></p><p>​<strong>DHCP Ack</strong></p><p>四个过程。</p><h2 id="Wireshark抓包"><a href="#Wireshark抓包" class="headerlink" title="Wireshark抓包"></a>Wireshark抓包</h2><p>通过Wireshark抓取DHCP获取IP过程的数据报文。</p><p>1、开Wireshark抓包</p><p>2、PC当前已有IP，使用cmd命令释放IP（ipconfig &#x2F;release)，并重新获取IP（ipconfig &#x2F;renew）</p><img src="/2024/09/07/DHCP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/1.png" class="" title="alt text"><p>3、停止抓包，使用bootp过滤报文。</p><img src="/2024/09/07/DHCP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/2.png" class="" title="alt text"><p>4、可以看到图中的5个报文，其中DHCP Release报文为PC释放IP时发出的报文。</p><img src="/2024/09/07/DHCP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/3.png" class="" title="alt text"><h3 id="DHCP-Discover报文"><a href="#DHCP-Discover报文" class="headerlink" title="DHCP Discover报文"></a>DHCP Discover报文</h3><p>获取IP时，PC会发送DHCP Discover广播报文，由于当前PC没有IP，故源IP为0.0.0.0；特别要注意到的是，PC会随机出一个Transaction ID，如果之后收到的Offer报文中的Transaction ID与PC模拟出的不同，PC会将该Offer报文直接丢弃。</p><img src="/2024/09/07/DHCP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/4.png" class="" title="alt text"><h3 id="DHCP-Offer报文"><a href="#DHCP-Offer报文" class="headerlink" title="DHCP Offer报文"></a>DHCP Offer报文</h3><img src="/2024/09/07/DHCP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/5.png" class="" title="alt text"><h3 id="DHCP-Request报文"><a href="#DHCP-Request报文" class="headerlink" title="DHCP Request报文"></a>DHCP Request报文</h3><img src="/2024/09/07/DHCP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/6.png" class="" title="alt text"><h3 id="DHCP-Ack报文"><a href="#DHCP-Ack报文" class="headerlink" title="DHCP Ack报文"></a>DHCP Ack报文</h3><img src="/2024/09/07/DHCP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/7.png" class="" title="alt text"><p>【模拟服务器发送Offer报文的过程及注意事项】<br>1、保证服务器与客户端的连通性<br>2、准备好一个Offer报文（可编辑）<br>3、使用Wireshark抓取客户端发出的Discover报文，确定当前客户端随机出的Transaction ID<br>4、更改Offer报文中的Transaction ID与Discover报文中一致<br>5、使用发包软件发送Offer报文</p><p>注：Transaction ID</p><h2 id="【地址租期】"><a href="#【地址租期】" class="headerlink" title="【地址租期】"></a>【地址租期】</h2><p>DHCP服务器提供的每个IP地址都有相应的租用期，在Offer报文中的IP Address Lease Time中可以看到。地址租期时间过长会导致地址资源长期被占用，租期过短会导致DHCP请求包过多，增加网络负担。还要结合当前使用场景来设置。一般来说，对DHCP客户端数量较大，且断开网络比较频繁的场所，如机场、商铺等，一般把DHCP租期配置较短，这样IP地址能很快被回收。</p><h2 id="【IP续租过程】"><a href="#【IP续租过程】" class="headerlink" title="【IP续租过程】"></a>【IP续租过程】</h2><p>客户端会在地址租期还有1&#x2F;2的时候，向DHCP服务器发送DHCP Request报文；如果收到服务器的DHCP Ack后，客户端的IP地址租期重新回满。<br>如果未收到Ack，可继续使用该IP，在租期还有1&#x2F;4时发出第二次Request报文；如果收到Ack，租期回满；<br>如果未收到Ack，在租期还有1&#x2F;8时发出第三次Request报文，如果收到Ack，租期回满<br>如果未收到Ack，租期结束后IP被回收。</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">文章原文：https://www.cnblogs.com/Wendy-r/p/12679241.html</span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      <categories>
+          
+          <category> 网络协议分析 </category>
+          
+      </categories>
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>TCP协议抓包分析</title>
       <link href="/2024/08/11/TCP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/"/>
       <url>/2024/08/11/TCP%E5%8D%8F%E8%AE%AE%E6%8A%93%E5%8C%85%E5%88%86%E6%9E%90/</url>
